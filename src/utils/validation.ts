@@ -166,3 +166,62 @@ export const validateGetAllIssuesQuery = (query: {
 
   return errors;
 };
+
+export const validateUpdateIssue = (body: {
+  title?: unknown;
+  description?: unknown;
+  type?: unknown;
+}): ValidationError[] => {
+  const errors: ValidationError[] = [];
+  if (
+    body.title === undefined &&
+    body.description === undefined &&
+    body.type === undefined
+  ) {
+    errors.push({
+      field: 'body',
+      message: 'At least one field (title, description, type) is required',
+    });
+    return errors;
+  }
+
+  if (body.title !== undefined) {
+    if (typeof body.title !== 'string' || body.title.trim() === '') {
+      errors.push({
+        field: 'title',
+        message: 'Title must be a non-empty string',
+      });
+    } else if (body.title.trim().length >= 150) {
+      errors.push({
+        field: 'title',
+        message: 'Title must be equal or less than 150 characters',
+      });
+    }
+  }
+
+  if (body.description !== undefined) {
+    if (
+      typeof body.description !== 'string' ||
+      body.description.trim() === ''
+    ) {
+      errors.push({
+        field: 'description',
+        message: 'Description must be a non-empty string',
+      });
+    } else if (body.description.trim().length < 20) {
+      errors.push({
+        field: 'description',
+        message: 'Description must be at least 20 characters',
+      });
+    }
+  }
+
+  if (body.type !== undefined && !isValidIssueType(body.type as string)) {
+    errors.push({
+      field: 'type',
+      message: 'Type must be bug or feature_request',
+    });
+  }
+
+  return errors;
+};

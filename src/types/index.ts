@@ -26,3 +26,9 @@ export interface GetAllIssuesQuery {
   type?: IssueType;
   status?: IssueStatus;
 }
+
+export interface UpdateIssueBody {
+  title?: string;
+  description?: string;
+  type?: IssueType;
+}

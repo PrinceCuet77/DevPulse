@@ -7,10 +7,12 @@ import type {
   IssueStatus,
   IssueType,
   SortType,
+  UpdateIssueBody,
 } from '../../types';
 import {
   validateCreateIssue,
   validateGetAllIssuesQuery,
+  validateUpdateIssue,
 } from '../../utils/validation';
 import { issuesService } from './issues.service';
 import type { JwtPayload } from 'jsonwebtoken';
@@ -129,8 +131,97 @@ const getSingleIssue = async (req: Request, res: Response) => {
   }
 };
 
+const updateSingleIssue = async (req: Request, res: Response) => {
+  try {
+    const errors = validateUpdateIssue(req.body as UpdateIssueBody);
+    if (errors.length > 0) {
+      sendResponse(res, {
+        statusCode: StatusCodes.BAD_REQUEST,
+        success: false,
+        message: 'Validation failed',
+        errors,
+      });
+      return;
+    }
+
+    const issueId = req.params.id as string;
+    const issue = await issuesService.updateSingleIssueInDB(
+      issueId,
+      req.user as JwtPayload,
+      req.body as UpdateIssueBody,
+    );
+
+    if (!issue) {
+      sendResponse(res, {
+        statusCode: StatusCodes.NOT_FOUND,
+        success: false,
+        message: 'Issue not found',
+      });
+      return;
+    }
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Issue updated successfully',
+      data: issue,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'FORBIDDEN') {
+      sendResponse(res, {
+        statusCode: StatusCodes.FORBIDDEN,
+        success: false,
+        message: 'You are not allowed to update this issue',
+      });
+      return;
+    }
+
+    console.error('Update single issue error:', error);
+
+    sendResponse(res, {
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
+const deleteSingleIssue = async (req: Request, res: Response) => {
+  try {
+    const issueId = req.params.id;
+    const issue = await issuesService.deleteSingleIssueInDB(
+      issueId as string,
+    );
+
+    if (!issue) {
+      sendResponse(res, {
+        statusCode: StatusCodes.NOT_FOUND,
+        success: false,
+        message: 'Issue not found',
+      });
+      return;
+    }
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Issue deleted successfully',
+    });
+  } catch (error: unknown) {
+    console.error('Delete single issue error:', error);
+
+    sendResponse(res, {
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
 export const issuesController = {
   createIssue,
   getAllIssues,
   getSingleIssue,
+  deleteSingleIssue,
+  updateSingleIssue,
 };

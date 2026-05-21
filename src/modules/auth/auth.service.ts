@@ -67,7 +67,7 @@ const loginUser = async (payload: LoginBody) => {
   };
 
   const token = jwt.sign(jwtpayload, config.secret as string, {
-    expiresIn: '20s',
+    expiresIn: '1d',
   });
 
   delete user.password;

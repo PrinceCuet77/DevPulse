@@ -1,6 +1,10 @@
 import type { JwtPayload } from 'jsonwebtoken';
 import { pool } from '../../db';
-import type { CreateIssueBody, GetAllIssuesQuery } from '../../types';
+import type {
+  CreateIssueBody,
+  GetAllIssuesQuery,
+  UpdateIssueBody,
+} from '../../types';
 
 const createIssueInDB = async (
   userDetails: JwtPayload,
@@ -101,8 +105,80 @@ const getSingleIssueFromDB = async (issueId: string) => {
   };
 };
 
+const updateSingleIssueInDB = async (
+  issueId: string,
+  userDetails: JwtPayload,
+  payload: UpdateIssueBody,
+) => {
+  const { title, description, type } = payload;
+  const issueResult = await pool.query(
+    `SELECT id, title, status, reporter_id FROM issues WHERE id = $1`,
+    [issueId],
+  );
+
+  if (issueResult.rows.length === 0) {
+    return null;
+  }
+
+  const issue = issueResult.rows[0];
+  if (userDetails.role === 'contributor') {
+    if (issue.reporter_id !== userDetails.id || issue.status !== 'open') {
+      throw new Error('FORBIDDEN');
+    }
+  }
+
+  const fields: string[] = [];
+  const values: unknown[] = [];
+
+  if (title) {
+    values.push(title.trim());
+    fields.push(`title = $${values.length}`);
+  }
+
+  if (description) {
+    values.push(description.trim());
+    fields.push(`description = $${values.length}`);
+  }
+
+  if (type) {
+    values.push(type);
+    fields.push(`type = $${values.length}`);
+  }
+
+  values.push(issueId);
+
+  const updatedResult = await pool.query(
+    `UPDATE issues SET ${fields.join(', ')}, updated_at = NOW()
+     WHERE id = $${values.length}
+     RETURNING id, title, description, type, status, reporter_id, created_at, updated_at`,
+    values,
+  );
+
+  return updatedResult.rows[0];
+};
+
+const deleteSingleIssueInDB = async (issueId: string) => {
+  const issueResult = await pool.query(
+    `DELETE FROM issues
+     WHERE id = $1
+     RETURNING id`,
+    [issueId],
+  );
+
+  const issue = issueResult.rows[0];
+  if (issueResult.rows.length === 0) {
+    return null;
+  }
+
+  return {
+    id: issue.id,
+  };
+};
+
 export const issuesService = {
   createIssueInDB,
   getAllIssuesFromDB,
   getSingleIssueFromDB,
+  updateSingleIssueInDB,
+  deleteSingleIssueInDB,
 };
