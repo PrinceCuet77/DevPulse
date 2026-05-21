@@ -1,4 +1,4 @@
-import type { IssueType, UserRole } from '../types';
+import type { IssueStatus, IssueType, SortType, UserRole } from '../types';
 
 export interface ValidationError {
   field: string;
@@ -15,6 +15,14 @@ export const isValidRole = (role: string): role is UserRole => {
 
 export const isValidIssueType = (type: string): type is IssueType => {
   return type === 'bug' || type === 'feature_request';
+};
+
+export const isValidIssueStatus = (status: string): status is IssueStatus => {
+  return status === 'open' || status === 'in_progress' || status === 'resolved';
+};
+
+export const isValidSortOrder = (sort: string): sort is SortType => {
+  return sort === 'newest' || sort === 'oldest';
 };
 
 export const validateSignup = (body: {
@@ -35,7 +43,7 @@ export const validateSignup = (body: {
   });
   otherErrors.forEach((error) => errors.push(error));
 
-  if (body.role !== undefined && !isValidRole(body.role as string)) {
+  if (!isValidRole(body.role as string)) {
     errors.push({
       field: 'role',
       message: 'Role must be contributor or maintainer',
@@ -125,6 +133,34 @@ export const validateCreateIssue = (body: {
     errors.push({
       field: 'type',
       message: 'Type must be bug or feature_request',
+    });
+  }
+
+  return errors;
+};
+
+export const validateGetAllIssuesQuery = (query: {
+  sort?: unknown;
+  type?: unknown;
+  status?: unknown;
+}): ValidationError[] => {
+  const errors: ValidationError[] = [];
+
+  if (!isValidSortOrder(query.sort as string)) {
+    errors.push({ field: 'sort', message: 'Sort must be newest or oldest' });
+  }
+
+  if (!isValidIssueType(query.type as string)) {
+    errors.push({
+      field: 'type',
+      message: 'Type must be bug or feature_request',
+    });
+  }
+
+  if (!isValidIssueStatus(query.status as string)) {
+    errors.push({
+      field: 'status',
+      message: 'Status must be open, in_progress, or resolved',
     });
   }
 
