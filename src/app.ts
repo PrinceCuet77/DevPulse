@@ -4,7 +4,7 @@ import express, {
   type Response,
 } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { authRoute } from './auth/auth.route';
+import { authRoute } from './modules/auth/auth.route';
 
 const app: Application = express();
 
