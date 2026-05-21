@@ -36,7 +36,7 @@ const signupUser = async (req: Request, res: Response) => {
     const user = await authService.createUserIntoDB(req.body as SignupBody);
 
     sendResponse(res, {
-      statusCode: StatusCodes.OK,
+      statusCode: StatusCodes.CREATED,
       success: true,
       message: 'User registered successfully',
       data: user,

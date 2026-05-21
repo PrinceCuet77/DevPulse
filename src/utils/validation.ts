@@ -1,4 +1,4 @@
-import type { UserRole } from '../types';
+import type { IssueType, UserRole } from '../types';
 
 export interface ValidationError {
   field: string;
@@ -11,6 +11,10 @@ export const isValidEmail = (email: string): boolean => {
 
 export const isValidRole = (role: string): role is UserRole => {
   return role === 'contributor' || role === 'maintainer';
+};
+
+export const isValidIssueType = (type: string): type is IssueType => {
+  return type === 'bug' || type === 'feature_request';
 };
 
 export const validateSignup = (body: {
@@ -62,6 +66,65 @@ export const validateLogin = (body: {
     errors.push({
       field: 'password',
       message: 'Password must be at least 6 characters',
+    });
+  }
+
+  return errors;
+};
+
+export const validateCreateIssue = (body: {
+  title: unknown;
+  description: unknown;
+  type: unknown;
+}): ValidationError[] => {
+  const errors: ValidationError[] = [];
+
+  if (
+    !body.title ||
+    typeof body.title !== 'string' ||
+    body.title.trim() === ''
+  ) {
+    errors.push({ field: 'title', message: 'Title is required' });
+  }
+
+  if (
+    body.title &&
+    typeof body.title === 'string' &&
+    body.title.trim().length >= 150
+  ) {
+    errors.push({
+      field: 'title',
+      message: 'Title must be equal or less than 150 characters',
+    });
+  }
+
+  if (
+    !body.description ||
+    typeof body.description !== 'string' ||
+    body.description.trim() === ''
+  ) {
+    errors.push({ field: 'description', message: 'Description is required' });
+  }
+
+  if (
+    body.description &&
+    typeof body.description === 'string' &&
+    body.description.trim().length < 20
+  ) {
+    errors.push({
+      field: 'description',
+      message: 'Description must be at least 20 characters',
+    });
+  }
+
+  if (
+    !body.type ||
+    typeof body.type !== 'string' ||
+    !isValidIssueType(body.type)
+  ) {
+    errors.push({
+      field: 'type',
+      message: 'Type must be bug or feature_request',
     });
   }
 
