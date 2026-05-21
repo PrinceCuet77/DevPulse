@@ -4,9 +4,10 @@ import express, {
   type Response,
 } from 'express';
 import { StatusCodes } from 'http-status-codes';
+
 const app: Application = express();
 
-app.get('/healthy', (req: Request, res: Response) => {
+app.get('/health', (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({
     success: true,
     message: 'The server is healthy',
