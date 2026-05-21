@@ -98,7 +98,39 @@ const getAllIssues = async (req: Request, res: Response) => {
   }
 };
 
+const getSingleIssue = async (req: Request, res: Response) => {
+  try {
+    const issueId = req.params.id;
+    const issue = await issuesService.getSingleIssueFromDB(issueId as string);
+
+    if (!issue) {
+      sendResponse(res, {
+        statusCode: StatusCodes.NOT_FOUND,
+        success: false,
+        message: 'Issue not found',
+      });
+      return;
+    }
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Issue retrieved successfully',
+      data: issue,
+    });
+  } catch (error: unknown) {
+    console.error('Get single issue error:', error);
+
+    sendResponse(res, {
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
 export const issuesController = {
   createIssue,
   getAllIssues,
+  getSingleIssue,
 };
