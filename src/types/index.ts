@@ -6,3 +6,8 @@ export interface SignupBody {
   password: string;
   role?: UserRole;
 }
+
+export interface LoginBody {
+  email: string;
+  password: string;
+}

@@ -25,6 +25,28 @@ export const validateSignup = (body: {
     errors.push({ field: 'name', message: 'Name is required' });
   }
 
+  const otherErrors = validateLogin({
+    email: body.email,
+    password: body.password,
+  });
+  otherErrors.forEach((error) => errors.push(error));
+
+  if (body.role !== undefined && !isValidRole(body.role as string)) {
+    errors.push({
+      field: 'role',
+      message: 'Role must be contributor or maintainer',
+    });
+  }
+
+  return errors;
+};
+
+export const validateLogin = (body: {
+  email: unknown;
+  password: unknown;
+}): ValidationError[] => {
+  const errors: ValidationError[] = [];
+
   if (!body.email || typeof body.email !== 'string') {
     errors.push({ field: 'email', message: 'Email is required' });
   } else if (!isValidEmail(body.email)) {
@@ -40,13 +62,6 @@ export const validateSignup = (body: {
     errors.push({
       field: 'password',
       message: 'Password must be at least 6 characters',
-    });
-  }
-
-  if (body.role !== undefined && !isValidRole(body.role as string)) {
-    errors.push({
-      field: 'role',
-      message: 'Role must be contributor or maintainer',
     });
   }
 
