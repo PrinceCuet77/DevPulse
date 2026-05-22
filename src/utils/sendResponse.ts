@@ -1,4 +1,4 @@
-import type { Response } from "express";
+import type { Response } from 'express';
 import type { StatusCodes } from 'http-status-codes';
 
 type TResponse<T> = {

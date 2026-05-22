@@ -36,6 +36,10 @@ const findUserByEmail = async (email: string) => {
     [email.trim()],
   );
 
+  if (!user || user.rows.length === 0) {
+    return null;
+  }
+
   return user.rows[0];
 };
 

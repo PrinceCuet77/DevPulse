@@ -43,7 +43,7 @@ export const validateSignup = (body: {
   });
   otherErrors.forEach((error) => errors.push(error));
 
-  if (!isValidRole(body.role as string)) {
+  if (body.role && !isValidRole(body.role as string)) {
     errors.push({
       field: 'role',
       message: 'Role must be contributor or maintainer',
@@ -146,18 +146,18 @@ export const validateGetAllIssuesQuery = (query: {
 }): ValidationError[] => {
   const errors: ValidationError[] = [];
 
-  if (!isValidSortOrder(query.sort as string)) {
+  if (query.sort && !isValidSortOrder(query.sort as string)) {
     errors.push({ field: 'sort', message: 'Sort must be newest or oldest' });
   }
 
-  if (!isValidIssueType(query.type as string)) {
+  if (query.type && !isValidIssueType(query.type as string)) {
     errors.push({
       field: 'type',
       message: 'Type must be bug or feature_request',
     });
   }
 
-  if (!isValidIssueStatus(query.status as string)) {
+  if (query.status && !isValidIssueStatus(query.status as string)) {
     errors.push({
       field: 'status',
       message: 'Status must be open, in_progress, or resolved',

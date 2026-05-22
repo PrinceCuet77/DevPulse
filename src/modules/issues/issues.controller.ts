@@ -222,6 +222,6 @@ export const issuesController = {
   createIssue,
   getAllIssues,
   getSingleIssue,
-  deleteSingleIssue,
   updateSingleIssue,
+  deleteSingleIssue,
 };

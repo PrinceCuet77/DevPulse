@@ -26,17 +26,20 @@ const getAllIssuesFromDB = async (query: GetAllIssuesQuery) => {
   const { sort, type, status } = query;
 
   const values: string[] = [];
+  const fields: string[] = [];
   if (type) {
     values.push(type);
+    fields.push(`type = $${values.length}`);
   }
   if (status) {
     values.push(status);
+    fields.push(`status = $${values.length}`);
   }
 
   const issuesResult = await pool.query(
     `SELECT id, title, description, type, status, reporter_id, created_at, updated_at
      FROM issues
-     WHERE ${type ? `type = $1` : ''} AND ${status ? `status = $2` : ''}
+     ${fields.length > 0 ? `WHERE ${fields.join(' AND ')}` : ''}
      ORDER BY created_at ${sort === 'oldest' ? 'ASC' : 'DESC'}`,
     values,
   );
@@ -109,7 +112,7 @@ const updateSingleIssueInDB = async (
   issueId: string,
   userDetails: JwtPayload,
   payload: UpdateIssueBody,
-) => {
+) => { 
   const { title, description, type } = payload;
   const issueResult = await pool.query(
     `SELECT id, title, status, reporter_id FROM issues WHERE id = $1`,
@@ -166,7 +169,7 @@ const deleteSingleIssueInDB = async (issueId: string) => {
   );
 
   const issue = issueResult.rows[0];
-  if (issueResult.rows.length === 0) {
+  if (!issue) {
     return null;
   }
 
