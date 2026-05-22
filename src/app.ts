@@ -13,10 +13,10 @@ const app: Application = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/health', (req: Request, res: Response) => {
+app.get('/', (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({
     success: true,
-    message: 'The server is healthy',
+    message: 'The server is healthy and running smoothly.',
   });
 });
 
